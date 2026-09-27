@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="page-title">esultan-movies</title>
+
+    <style>
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #121218;
+            --bg-card: rgba(18, 18, 24, 0.7);
+            --accent-glow: #e50914;
+            --accent-gradient: linear-gradient(135deg, #e50914, #ff416c);
+            --text-color: #ffffff;
+            --text-muted: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(20, 20, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --store-name-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            touch-action: pan-x pan-y;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-primary);
+            color: var(--text-color);
+            overflow-x: hidden;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 20%, #1a0b2e 0%, var(--bg-primary) 70%);
+        }
+
+        #toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast-msg {
+            background: rgba(16, 185, 129, 0.95);
+            color: white;
+            padding: 12px 22px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-size: 0.95rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .toast-msg.error {
+            background: rgba(239, 68, 68, 0.95);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(10px); }
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .logo-area img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-glow);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .logo-area h1 {
+            font-size: 1.8rem;
+            color: var(--store-name-color);
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: #1d9bf0;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: bold;
+            margin-right: 5px;
+            clip-path: polygon(50% 0%, 65% 15%, 85% 10%, 90% 30%, 105% 45%, 90% 60%, 85% 80%, 65% 85%, 50% 100%, 35% 85%, 15% 80%, 10% 60%, -5% 45%, 10% 30%, 15% 10%, 35% 15%);
+            box-shadow: 0 0 10px rgba(29, 155, 240, 0.6);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stars-counter-badge {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+        }
+
+        .stars-counter-badge span {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .user-auth-info {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .user-auth-info strong {
+            color: var(--text-color);
+        }
+
+        main {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 6px;
+            height: 24px;
+            background: var(--accent-gradient);
+            border-radius: 4px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .category-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-glow);
+            box-shadow: 0 10px 25px rgba(229, 9, 20, 0.3);
+        }
+
+        .category-card.locked {
+            filter: grayscale(0.8);
+        }
+
+        .category-card.locked::after {
+            content: attr(data-lock-text);
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 16px;
+            font-weight: bold;
+            color: #ffd700;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .media-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .media-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-glow);
+        }
+
+        .media-thumb {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            background: #1e1e2f;
+        }
+
+        .media-details {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        .media-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .media-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .watch-btn {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+        }
+
+        .watch-btn:hover {
+            opacity: 0.9;
+        }
+
+        .leaderboard-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 50px;
+            backdrop-filter: blur(12px);
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .leaderboard-item:nth-child(1) { border-color: #ffd700; background: rgba(255, 215, 0, 0.05); }
+        .leaderboard-item:nth-child(2) { border-color: #c0c0c0; background: rgba(192, 192, 192, 0.05); }
+        .leaderboard-item:nth-child(3) { border-color: #cd7f32; background: rgba(205, 127, 50, 0.05); }
+
+        .floating-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 999;
+        }
+
+        .float-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            font-size: 1.4rem;
+            position: relative;
+        }
+
+        .float-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--accent-glow);
+            background: var(--accent-gradient);
+        }
+
+        .float-btn::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 70px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            border: 1px solid var(--glass-border);
+        }
+
+        .float-btn:hover::before {
+            opacity: 1;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #14141f;
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 10px rgba(229, 9, 20, 0.2);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(229, 9, 20, 0.4);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .image-upload-box {
+            width: 100%;
+            height: 140px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            background: rgba(255,255,255,0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-upload-box:hover {
+            border-color: var(--accent-glow);
+            background: rgba(229, 9, 20, 0.05);
+        }
+
+        .image-upload-box span {
+            font-size: 2.5rem;
+            color: var(--accent-glow);
+            font-weight: bold;
+        }
+
+        .image-upload-box p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .image-upload-box input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .image-preview-container {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .image-preview-container img, .image-preview-container video {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .episodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .episode-card-lux {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .admin-tab-btn {
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .admin-tab-btn.active {
+            background: var(--accent-gradient);
+            border-color: transparent;
+        }
+
+        .admin-tab-content {
+            display: none;
+        }
+
+        .admin-tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .action-actions-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+        }
+
+        .btn-edit { background: #3b82f6; color: white; }
+        .btn-delete { background: #ef4444; color: white; }
+        .btn-approve { background: #10b981; color: white; }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .stat-box h3 {
+            font-size: 1.8rem;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .stat-box p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* تصميم صفحة الشات / المحتوى المستقلة الجديدة */
+        #chat-page-view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-stream-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .chat-stream-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .chat-stream-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-glow);
+        }
+        .chat-stream-body {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: var(--text-color);
+            background: rgba(0,0,0,0.2);
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .chat-stream-media {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles"></div>
+    <div id="toast-container"></div>
+
+    <header>
+        <div class="logo-area" onclick="goHome()">
+            <img id="nav-logo-img" src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=100" alt="Logo">
+            <h1 id="nav-store-name">esultan</h1>
+            <div id="nav-verified-container"></div>
+        </div>
+        <div class="header-controls">
+            <div class="stars-counter-badge" onclick="openStarsModal()">
+                ⭐ <span id="header-user-stars">0</span> نجوم
+            </div>
+            <div class="user-auth-info" id="header-auth-display">
+                غير مسجل الدخول
+            </div>
+        </div>
+    </header>
+
+    <!-- الواجهة الأساسية للأفلام -->
+    <main id="main-content-area">
+        <div class="section-title">أقسام الموقع</div>
+        <div class="categories-grid" id="categories-container"></div>
+
+        <div class="section-title" id="dynamic-main-title">أحدث الأفلام والمسلسلات الفخمة</div>
+        <div class="media-grid" id="media-container"></div>
+
+        <div class="leaderboard-section">
+            <div class="section-title" style="margin-bottom: 0;">أعلى المستخدمين تميزاً (نجوم 1K+ أو موثقين)</div>
+            <div class="leaderboard-list" id="leaderboard-container"></div>
+        </div>
+    </main>
+
+    <!-- صفحة الشات / المحتوى المستقلة الجديدة -->
+    <main id="chat-page-view" style="display: none;">
+        <div class="section-title">منصة النشر الحصري والقصائد والرسائل الفخمة 💬</div>
+        <div id="chat-stream-container"></div>
+    </main>
+
+    <!-- الأزرار العائمة -->
+    <div class="floating-buttons">
+        <div class="float-btn" data-tooltip="لوحة المشرف" onclick="openAdminSecurityModal()">⚙️</div>
+        <div class="float-btn" data-tooltip="إعدادات المستخدم والملف الشخصي" onclick="openUserSettingsModal()">👤</div>
+        <div class="float-btn" data-tooltip="شحن النجوم السريع" onclick="openStarsModal()">⭐</div>
+        
+        <!-- زر التبديل الذكي بين الشات والأفلام -->
+        <div class="float-btn" id="toggle-view-float-btn" data-tooltip="افتح صفحة الشات والمحتوى الحصري" onclick="toggleChatAndHomeView()">💬</div>
+    </div>
+
+    <!-- نافذة التحقق الأمني لوحة المشرف -->
+    <div class="modal-overlay" id="admin-security-modal">
+        <div class="modal-content" style="max-width: 450px; text-align: center;">
+            <button class="modal-close" onclick="closeModal('admin-security-modal')">&times;</button>
+            <h2 style="margin-bottom: 15px; color: var(--accent-glow);">حماية لوحة المشرف</h2>
+            <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">أدخل رقماً عشوائياً (1 إلى 99999). الرقم الخاطئ يطردك فوراً!</p>
+            <div class="form-group">
+                <input type="number" id="sec-random-num" class="form-control" placeholder="أدخل رقم التحقق" style="text-align: center; font-size: 1.2rem;">
+            </div>
+            <button class="btn-primary" onclick="verifyAdminStep1()">تحقق والمتابعة</button>
+        </div>
+    </div>
+
+    <!-- نافذة كلمة سر لوحة المشرف -->
+    <div class="modal-overlay" id="admin-pass-modal">
+        <div class="modal-content" style="max-width: 450px; text-align: center;">
+            <button class="modal-close" onclick="closeModal('admin-pass-modal')">&times;</button>
+            <h2 style="margin-bottom: 15px; color: var(--accent-glow);">كلمة سر لوحة المشرف</h2>
+            <div class="form-group">
+                <input type="password" id="sec-admin-pass" class="form-control" placeholder="كلمة السر السرية" style="text-align: center; font-size: 1.2rem;">
+            </div>
+            <button class="btn-primary" onclick="verifyAdminPassword()">دخول للوحة المشرف</button>
+        </div>
+    </div>
+
+    <!-- لوحة المشرف المركزية -->
+    <div class="modal-overlay" id="admin-dashboard-modal">
+        <div class="modal-content" style="max-width: 1050px;">
+            <button class="modal-close" onclick="closeModal('admin-dashboard-modal')">&times;</button>
+            <h2 style="margin-bottom: 20px; color: var(--accent-glow);">لوحة المشرف المركزية الكاملة (Backend Synced)</h2>
+            
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" onclick="switchAdminTab('tab-media')">إدارة الأعمال والحلقات</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('tab-chat-publish')">نشر صفحة الشات والحصريات 💬</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('tab-cats')">إدارة وتعديل الأقسام والأعمال</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('tab-store')">المتجر، الاسم والتوثيق</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('tab-users')">النجوم، الـ ID والحظر</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('tab-stars')">أسعار النجوم والخصومات</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('tab-verification-prices')">إدارة أسعار التوثيق 🏅</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('tab-requests')">الطلبات الواردة</button>
+            </div>
+
+            <!-- تبويب النشر الجديد لصفحة الشات -->
+            <div id="tab-chat-publish" class="admin-tab-content">
+                <h3 style="margin-bottom: 15px; color: var(--accent-glow);">نشر منشور، صورة، فيديو أو قصيدة في صفحة الشات الحصرية 💬</h3>
+                <form id="admin-chat-publish-form" onsubmit="handleAdminPublishChatPost(event)">
+                    <div class="form-group">
+                        <label>عنوان المنشور (اختياري)</label>
+                        <input type="text" id="admin-chat-title" class="form-control" placeholder="عنوان المنشور أو القصيدة">
+                    </div>
+                    <div class="form-group">
+                        <label>النص، القصيدة أو المحتوى المكتوب</label>
+                        <textarea id="admin-chat-text" class="form-control" rows="5" placeholder="اكتب هنا أي نص، قصيدة، رسالة أو محتوى فخم..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>إرفاق صورة أو فيديو (مربع ب علامة +)</label>
+                        <div class="image-upload-box">
+                            <span>+</span>
+                            <p>اضغط لاختيار صورة أو فيديو للمنشور</p>
+                            <input type="file" id="admin-chat-file" accept="image/*,video/*" onchange="previewAdminChatFile(event)">
+                        </div>
+                        <div class="image-preview-container" id="admin-chat-preview-box" style="display:none;">
+                            <img id="admin-chat-preview-img" src="" style="display:none;" alt="Preview">
+                            <video id="admin-chat-preview-video" src="" style="display:none; width:60px; height:60px;" controls></video>
+                            <span style="font-size:0.9rem; color:var(--text-muted);">تم اختيار الملف بنجاح</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">نشر فوري في صفحة الشات عبر الـ Backend</button>
+                </form>
+
+                <h3 style="margin: 30px 0 15px 0;">المنشورات الحالية في صفحة الشات</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>العنوان / المحتوى</th>
+                            <th>التحكم</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-chat-posts-table-body"></tbody>
+                </table>
+            </div>
+
+            <div id="tab-media" class="admin-tab-content active">
+                <h3 style="margin-bottom: 15px;">نشر فيلم، مسلسل أو فيديو جديد</h3>
+                <form id="add-media-form" onsubmit="handleAddMedia(event)">
+                    <div class="form-group">
+                        <label>القسم</label>
+                        <select id="admin-media-cat" class="form-control" onchange="updateAdminTargetWorkEpisodes()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>اختر العمل المراد إضافة الحلقة إليه (أو أنشئ عملاً جديداً)</label>
+                        <select id="admin-target-media-select" class="form-control" onchange="toggleNewWorkInputs()"></select>
+                    </div>
+                    <div id="new-work-fields-container" style="display: none; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label>عنوان العمل الفخم الجديد</label>
+                            <input type="text" id="admin-media-title" class="form-control" placeholder="اسم الفيلم أو المسلسل الجديد">
+                        </div>
+                        <div class="form-group">
+                            <label>الوصف</label>
+                            <textarea id="admin-media-desc" class="form-control" rows="3" placeholder="تفاصيل العمل"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>صورة الغلاف للعمل الجديد (مربع جواه علامة +)</label>
+                            <div class="image-upload-box">
+                               <span>+</span>
+                               <p>اضغط لاختيار صورة الغلاف</p>
+                               <input type="file" id="admin-cover-file" accept="image/*" onchange="previewAdminCoverImage(event)">
+                            </div>
+                            <div class="image-preview-container" id="admin-cover-preview-box" style="display:none;">
+                                <img id="admin-cover-preview-img" src="" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" alt="Cover Preview">
+                                <span style="font-size:0.9rem; color:var(--text-muted);">تم اختيار الغلاف بنجاح</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الحلقة (للنشر أو الاستبدال)</label>
+                        <select id="admin-target-episode-num" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>ملف الفيديو أو الصورة للحلقة (مربع جواه علامة +)</label>
+                        <div class="image-upload-box">
+                            <span>+</span>
+                            <p>اضغط لاختيار صورة أو فيديو الحلقة</p>
+                            <input type="file" id="admin-media-file" accept="image/*,video/*" onchange="previewAdminMediaImage(event)">
+                        </div>
+                        <div class="image-preview-container" id="admin-media-preview-box" style="display:none;">
+                            <img id="admin-media-preview-img" src="" style="display:none;" alt="Preview">
+                            <video id="admin-media-preview-video" src="" style="display:none; width:60px; height:60px;" controls></video>
+                            <span style="font-size:0.9rem; color:var(--text-muted);">تم اختيار الملف بنجاح</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>أو أدخل رابط اختياري (URL)</label>
+                        <input type="text" id="admin-media-url-input" class="form-control" placeholder="https://example.com/video.mp4">
+                    </div>
+                    <button type="submit" class="btn-primary">نشر العمل أو الحلقة عبر الـ Backend</button>
+                </form>
+
+                <h3 style="margin: 30px 0 15px 0;">إدارة الحلقات وقفلها وتسميتها وحذفها</h3>
+                <div class="form-group">
+                    <label>اختر العمل لتعديل حلقة، تسميتها وحذفها</label>
+                    <select id="admin-select-media-episodes" class="form-control" onchange="loadEpisodesIntoAdmin()"></select>
+                </div>
+                <div id="admin-episodes-editor-container"></div>
+
+                <h3 style="margin: 30px 0 15px 0;">الأعمال المعروضة</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>العنوان</th>
+                            <th>القسم</th>
+                            <th>التحكم</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-media-table-body"></tbody>
+                </table>
+            </div>
+
+            <div id="tab-cats" class="admin-tab-content">
+                <h3 style="margin-bottom: 15px;">إضافة قسم جديد أو قفله بالنجوم</h3>
+                <div class="form-group">
+                    <label>اسم القسم الجديد</label>
+                    <input type="text" id="new-cat-name" class="form-control" placeholder="اسم القسم">
+                </div>
+                <div class="form-group">
+                    <label>قفل القسم بالنجوم (0 ليكون متاحاً)</label>
+                    <input type="number" id="new-cat-stars-lock" class="form-control" value="0">
+                </div>
+                <button class="btn-primary" onclick="addNewCategory()">إضافة القسم عبر Backend</button>
+
+                <h3 style="margin: 30px 0 15px 0;">الأقسام الحالية والتحكم بفتحها/قفلها وحذف أعمالها</h3>
+                <div class="form-group">
+                    <label>اختر القسم لعرض وتعديل أو حذف أعماله الداخلية:</label>
+                    <select id="admin-manage-cat-select" class="form-control" onchange="renderAdminCategoryWorksList()"></select>
+                </div>
+                <div id="admin-category-works-container" style="margin-bottom: 25px;"></div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم القسم</th>
+                            <th>حالة القفل</th>
+                            <th>التحكم</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-categories-table-body"></tbody>
+                </table>
+            </div>
+
+            <div id="tab-store" class="admin-tab-content">
+                <h3 style="margin-bottom: 15px;">تعديل اسم المتجر ولونه</h3>
+                <div class="form-group">
+                    <label>اسم المتجر</label>
+                    <input type="text" id="setting-store-title" class="form-control" value="esultan">
+                </div>
+                <div class="form-group">
+                    <label>لون اسم المتجر</label>
+                    <input type="color" id="setting-store-title-color" class="form-control" value="#ffffff">
+                </div>
+                <div class="form-group">
+                    <label>صورة اللوجو (مربع ب علامة +)</label>
+                    <div class="image-upload-box">
+                        <span>+</span>
+                        <p>اضغط لتغيير اللوجو</p>
+                        <input type="file" accept="image/*" onchange="updateLogoImage(event)">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>لون الموقع العام والخلفيات</label>
+                    <input type="color" id="color-bg-primary" class="form-control" value="#0a0a0c" onchange="updateThemeColors()">
+                </div>
+                <button class="btn-primary" onclick="saveStoreGeneralSettings()">حفظ إعدادات المتجر عبر Backend</button>
+
+                <h3 style="margin: 30px 0 15px 0;">نظام توثيق المستخدمين (بالـ ID)</h3>
+                <div class="form-group">
+                    <label>اختر المستخدم للتوثيق اليدوي</label>
+                    <select id="admin-verify-user-select" class="form-control"></select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-primary" style="background: #1d9bf0;" onclick="setUserVerified(true)">منح علامة التوثيق الحقيقية 🏅</button>
+                    <button class="btn-primary" style="background: #ef4444;" onclick="setUserVerified(false)">إزالة التوثيق</button>
+                </div>
+            </div>
+
+            <div id="tab-users" class="admin-tab-content">
+                <h3 style="margin-bottom: 15px;">إدارة رصيد النجوم وحظر المستخدمين بالـ ID</h3>
+                <div class="form-group">
+                    <label>اختر المستخدم</label>
+                    <select id="admin-select-user-manage" class="form-control" onchange="loadUserManageData()"></select>
+                </div>
+                <div class="form-group">
+                    <label>رصيد النجوم (إضافة أو خصم)</label>
+                    <input type="number" id="admin-user-stars-mod" class="form-control" placeholder="عدد النجوم">
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="admin-user-ban-check" style="width: 20px; height: 20px;">
+                    <label for="admin-user-ban-check" style="margin-bottom: 0; color: #ef4444; font-weight: bold;">حظر هذا الـ ID تماماً</label>
+                </div>
+                <button class="btn-primary" style="margin-top: 15px;" onclick="saveUserManageModifications()">حفظ تعديلات المستخدم عبر Backend</button>
+            </div>
+
+            <div id="tab-stars" class="admin-tab-content">
+                <h3>إدارة أسعار النجوم والخصومات الذكية</h3>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>اختر نسبة الخصم الذكية (من 1% إلى 100%):</label>
+                    <select id="discount-percent-select" class="form-control"></select>
+                </div>
+                <button class="btn-primary" onclick="applyDiscountToStars()">تطبيق الخصم الفوري عبر Backend</button>
+
+                <h3 style="margin: 30px 0 15px 0;">تعديل السعر الأساسي</h3>
+                <div class="form-group">
+                    <label>سعر الـ 100 نجمة بالجنيه</label>
+                    <input type="number" id="base-price-100" class="form-control" value="10">
+                </div>
+                <button class="btn-primary" onclick="updateBaseStarPrice()">حفظ السعر الأساسي</button>
+            </div>
+
+            <!-- تبويب إدارة أسعار التوثيق -->
+            <div id="tab-verification-prices" class="admin-tab-content">
+                <h3 style="margin-bottom: 15px; color: #1d9bf0;">تحكم في أسعار باقات التوثيق الرسمي 🏅</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">يمكنك تعديل الأسعار بالجنيه لكل مدة وتحديثها فوراً للعملاء:</p>
+                
+                <div class="form-group">
+                    <label>سعر أسبوع واحد (جنيه)</label>
+                    <input type="number" id="price-input-week" class="form-control" value="20">
+                </div>
+                <div class="form-group">
+                    <label>سعر شهر كامل (جنيه)</label>
+                    <input type="number" id="price-input-month" class="form-control" value="50">
+                </div>
+                <div class="form-group">
+                    <label>سعر سنة كاملة (جنيه)</label>
+                    <input type="number" id="price-input-year" class="form-control" value="100">
+                </div>
+                <div class="form-group">
+                    <label>سعر للأبد / مدى الحياة (جنيه)</label>
+                    <input type="number" id="price-input-forever" class="form-control" value="200">
+                </div>
+                <button class="btn-primary" style="background: #1d9bf0;" onclick="saveVerificationPricesSettings()">حفظ أسعار التوثيق الجديدة عبر Backend</button>
+            </div>
+
+            <div id="tab-requests" class="admin-tab-content">
+                <h3 style="margin-bottom: 15px;">طلبات شحن النجوم من العملاء</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الـ ID</th>
+                            <th>رقم التحويل</th>
+                            <th>النجوم</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-recharge-requests-body"></tbody>
+                </table>
+
+                <h3 style="margin: 30px 0 15px 0;">طلبات توثيق الحسابات (بفلوس)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المستخدم (ID)</th>
+                            <th>المدة المطلوبة</th>
+                            <th>السعر</th>
+                            <th>رقم التحويل</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-verification-requests-body"></tbody>
+                </table>
+
+                <h3 style="margin: 30px 0 15px 0;">طلبات المحتوى الواردة</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المستخدم (ID)</th>
+                            <th>العنوان</th>
+                            <th>المقابل</th>
+                            <th>معاينة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-content-requests-body"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- نافذة إعدادات المستخدم الشخصية -->
+    <div class="modal-overlay" id="user-settings-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeModal('user-settings-modal')">&times;</button>
+            <h2 style="margin-bottom: 20px; color: var(--accent-glow);">إعدادات المستخدم والملف الشخصي</h2>
+            
+            <div id="user-settings-logged-out" style="display: block;">
+                <p style="margin-bottom: 15px; color: var(--text-muted);">يرجى تسجيل الدخول أو إنشاء حساب:</p>
+                <div class="form-group">
+                    <label>اسم المستخدم</label>
+                    <input type="text" id="auth-username" class="form-control" placeholder="اسمك الفريد">
+                </div>
+                <div class="form-group">
+                    <label>كلمة السر</label>
+                    <input type="password" id="auth-password" class="form-control" placeholder="كلمة السر">
+                </div>
+                <button class="btn-primary" onclick="registerOrLoginUser()">تسجيل الدخول / إنشاء حساب عبر Backend</button>
+            </div>
+
+            <div id="user-settings-logged-in" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 1.1rem; font-weight: bold;" id="my-profile-name-display">اسم المستخدم</div>
+                    <button class="btn-sm" style="background: #1d9bf0; color:white; padding: 8px 14px;" onclick="openVerificationPanelModal()">🏅 انقر للتوثيق</button>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <h3 id="my-profile-id">-----</h3>
+                        <p>الـ ID الخاص بك</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3 id="my-profile-stars">0</h3>
+                        <p>رصيد النجوم</p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 15px; border-radius: 12px; margin-bottom: 25px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--accent-glow);">تغيير كلمة السر الخاصة بك</h3>
+                    <div class="form-group">
+                        <label>كلمة السر القديمة</label>
+                        <input type="password" id="old-password-input" class="form-control" placeholder="أدخل كلمة السر الحالية">
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة السر الجديدة</label>
+                        <input type="password" id="new-password-input" class="form-control" placeholder="أدخل كلمة السر الجديدة">
+                    </div>
+                    <button class="btn-primary" style="background: #3b82f6;" onclick="changeUserPassword()">تحديث كلمة السر</button>
+                </div>
+
+                <h3 style="margin: 20px 0 10px 0;">رفع فيديو أو صورة جديدة</h3>
+                <div class="form-group">
+                    <label>عنوان المحتوى</label>
+                    <input type="text" id="user-upload-title" class="form-control" placeholder="عنوان الفيديو أو الصورة">
+                </div>
+                <div class="form-group">
+                    <label>اختر ملف الفيديو أو الصورة (مربع ب علامة +)</label>
+                    <div class="image-upload-box">
+                        <span>+</span>
+                        <p>اضغط لاختيار ملف</p>
+                        <input type="file" id="user-upload-image-file" accept="image/*,video/*" onchange="previewUserImageUpload(event)">
+                    </div>
+                    <div class="image-preview-container" id="user-upload-preview-box" style="display:none;">
+                        <img id="user-upload-preview-img" src="" style="display:none;" alt="Preview">
+                        <video id="user-upload-preview-video" src="" style="display:none; width:60px; height:60px;" controls></video>
+                        <span style="font-size:0.9rem; color:var(--text-muted);">تم اختيار الملف بنجاح</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>أو أدخل رابط اختياري (URL)</label>
+                    <input type="text" id="user-upload-url-input" class="form-control" placeholder="https://example.com/video.mp4">
+                </div>
+                <div class="form-group">
+                    <label>المقابل المطلوب</label>
+                    <select id="user-reward-choice" class="form-control">
+                        <option value="stars">نجوم رصيد في حسابي ⭐</option>
+                        <option value="money">فلوس وأرباح نقدية 💵</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="submitUserContentUpload()">إرسال المحتوى عبر Backend</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة واجهة طلب التوثيق -->
+    <div class="modal-overlay" id="verification-panel-modal">
+        <div class="modal-content" style="max-width: 480px; text-align: center;">
+            <button class="modal-close" onclick="closeModal('verification-panel-modal')">&times;</button>
+            <h2 style="margin-bottom: 15px; color: #1d9bf0;">شراء توثيق الحساب الرسمي 🏅</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem;">
+                فودافون كاش وانستا باي للتحويل: <strong style="color: white;">01007934086</strong>
+            </p>
+            <div class="form-group" style="text-align: right;">
+                <label>اختر مدة التوثيق المطلوبة</label>
+                <select id="verification-duration-select" class="form-control" onchange="updateVerificationPriceDisplay()"></select>
+            </div>
+            <div class="stat-box" style="background: rgba(29, 155, 240, 0.05); border-color: rgba(29, 155, 240, 0.2); margin-bottom: 20px;">
+                <p>المبلغ المطلوب تحويله:</p>
+                <h3 id="verification-price-display" style="color: #1d9bf0; margin-top: 5px;">0 جنيه</h3>
+            </div>
+            <div class="form-group" style="text-align: right;">
+                <label>رقم الهاتف المحول منه</label>
+                <input type="text" id="verification-sender-phone" class="form-control" placeholder="010xxxxxxxx">
+            </div>
+            <button class="btn-primary" style="background: #1d9bf0;" onclick="submitVerificationPurchaseRequest()">إرسال طلب شراء التوثيق للمشرف</button>
+        </div>
+    </div>
+
+    <!-- نافذة شحن النجوم الفوري -->
+    <div class="modal-overlay" id="stars-modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <button class="modal-close" onclick="closeModal('stars-modal')">&times;</button>
+            <h2 style="margin-bottom: 20px; color: #ffd700;">متجر وشحن النجوم الفوري ⭐</h2>
+            <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
+                فودافون كاش وانستا باي: <strong style="color: white; font-size: 1.1rem;">01007934086</strong>
+                <span id="verified-discount-notice" style="display: block; color: #10b981; font-weight: bold; margin-top: 5px;">✨ أنت حساب موثق! تحصل على خصم 50% (نصف السعر) تلقائياً.</span>
+            </p>
+            <div class="form-group">
+                <label>اختر باقة النجوم المطلوبة</label>
+                <select id="recharge-package-select" class="form-control" onchange="calculateRechargePrice()"></select>
+            </div>
+            <div class="stat-box" style="margin-bottom: 20px; background: rgba(255,215,0,0.05); border-color: rgba(255,215,0,0.2);">
+                <p>المبلغ المستحق:</p>
+                <h3 id="recharge-price-display" style="color: #ffd700; margin-top: 5px;">0 جنيه</h3>
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف المحول منه</label>
+                <input type="text" id="recharge-sender-phone" class="form-control" placeholder="010xxxxxxxx">
+            </div>
+            <div class="form-group">
+                <label>الـ ID الخاص بك</label>
+                <input type="text" id="recharge-user-id" class="form-control" placeholder="الـ ID الخاص بك">
+            </div>
+            <button class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="submitStarsRechargeRequest()">تأكيد وإرسال طلب الشحن عبر Backend</button>
+        </div>
+    </div>
+
+    <!-- نافذة مشاهدة تفاصيل العمل -->
+    <div class="modal-overlay" id="watch-media-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeModal('watch-media-modal')">&times;</button>
+            <h2 id="watch-modal-title" style="margin-bottom: 15px;">عنوان العمل</h2>
+            <div id="watch-modal-player-container" style="width: 100%; height: 350px; background: black; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; align-items: center; margin-bottom: 20px;"></div>
+            <p id="watch-modal-desc" style="color: var(--text-muted); margin-bottom: 20px;"></p>
+            
+            <div id="episodes-section-wrapper" style="display: none;">
+                <h3 style="margin-bottom: 10px;">حلقات المسلسل</h3>
+                <div class="episodes-grid" id="watch-modal-episodes-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = {
+            storeName: "esultan",
+            storeNameColor: "#ffffff",
+            logoUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=100",
+            colors: { bgPrimary: "#0a0a0c", accent: "#e50914" },
+            verificationPrices: { week: 20, month: 50, year: 100, forever: 200 },
+            users: [
+                { id: "57365", name: "Ahmed Sultan", pass: "123", stars: 1250, verified: true, verificationExpires: null, banned: false, unlockedCategories: [], unlockedEpisodes: [], personalUploads: [] },
+                { id: "93758", name: "Mohamed Ali", pass: "123", stars: 85000, verified: false, verificationExpires: null, banned: false, unlockedCategories: [], unlockedEpisodes: [], personalUploads: [] }
+            ],
+            categories: [
+                { id: 1, name: "أفلام حصرية", starsLock: 0, unlockedForIds: [] },
+                { id: 2, name: "مسلسلات رمضان", starsLock: 0, unlockedForIds: [] },
+                { id: 3, name: "أنمي وكرتون", starsLock: 500, unlockedForIds: [] },
+                { id: 4, name: "برامج وثائقية", starsLock: 0, unlockedForIds: [] }
+            ],
+            media: [
+                { 
+                    id: 1, 
+                    title: "مملكة الصحراء", 
+                    desc: "ملحمة درامية تاريخية ضخمة", 
+                    catId: 2, 
+                    url: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800", 
+                    isVideo: false,
+                    episodes: [
+                        { num: 1, name: "بداية الملحمة", locked: false, cost: 0, videoUrl: "" },
+                        { num: 2, name: "معركة الرمال", locked: false, cost: 0, videoUrl: "" }
+                    ]
+                }
+            ],
+            chatPosts: [
+                { id: 1, title: "أهلاً بكم في صفحة الشات والحصريات", text: "هنا يتم نشر أحدث القصائد، النصوص الفخمة، والصور الحصرية مباشرة من المشرف لتصل لجميع المستخدمين فوراً!", mediaUrl: "", isVideo: false }
+            ],
+            rechargeRequests: [],
+            verificationRequests: [],
+            contentRequests: [],
+            starPackages: [],
+            basePrice100: 10,
+            discountPercent: 0
+        };
+
+        let currentUser = null;
+        let adminTempFile = "";
+        let adminIsVideoFile = false;
+        let adminCoverTempFile = "";
+        let adminChatTempFile = "";
+        let adminChatIsVideo = false;
+        let userTempUploadFile = "";
+        let userIsVideoFile = false;
+        let currentViewingCatId = null;
+        let isChatPageViewActive = false;
+
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-msg ${isError ? 'error' : ''}`;
+            toast.innerHTML = `<span>${isError ? '❌' : '✅'}</span> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
+
+        function formatNumberAbbr(num) {
+            if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+            if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+            return num.toString();
+        }
+
+        function generateStarPackages() {
+            db.starPackages = [];
+            let current = 100;
+            while (current <= 1000000000) {
+                let rawPrice = (current / 100) * db.basePrice100;
+                let finalPrice = rawPrice * (1 - (db.discountPercent / 100));
+                if (currentUser && currentUser.verified) finalPrice = finalPrice * 0.5;
+                db.starPackages.push({ stars: current, price: Math.round(finalPrice) });
+                if (current < 1000) current += 100;
+                else if (current < 10000) current += 1000;
+                else if (current < 100000) current += 10000;
+                else if (current < 1000000) current += 100000;
+                else if (current < 10000000) current += 1000000;
+                else if (current < 100000000) current += 10000000;
+                else current += 100000000;
+            }
+        }
+
+        window.onload = function() {
+            loadLocalStorage();
+            generateStarPackages();
+            renderAll();
+            populateDiscountDropdown();
+        };
+
+        function saveLocalStorage() {
+            localStorage.setItem('esultan_backend_db_v10', JSON.stringify(db));
+        }
+
+        function loadLocalStorage() {
+            const saved = localStorage.getItem('esultan_backend_db_v10');
+            if (saved) { try { db = JSON.parse(saved); } catch(e) {} }
+        }
+
+        function populateDiscountDropdown() {
+            const sel = document.getElementById('discount-percent-select');
+            if(!sel) return;
+            sel.innerHTML = '';
+            for(let i=0; i<=100; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = `${i}% خصم`;
+                if(i === db.discountPercent) opt.selected = true;
+                sel.appendChild(opt);
+            }
+        }
+
+        function renderAll() {
+            generateStarPackages();
+            document.getElementById('page-title').innerText = `${db.storeName} - منصة الأفلام والمسلسلات`;
+            const titleEl = document.getElementById('nav-store-name');
+            titleEl.innerText = db.storeName;
+            titleEl.style.color = db.storeNameColor;
+            document.getElementById('setting-store-title').value = db.storeName;
+            document.getElementById('setting-store-title-color').value = db.storeNameColor;
+            document.getElementById('nav-logo-img').src = db.logoUrl;
+
+            if(!db.verificationPrices) db.verificationPrices = { week: 20, month: 50, year: 100, forever: 200 };
+            document.getElementById('price-input-week').value = db.verificationPrices.week;
+            document.getElementById('price-input-month').value = db.verificationPrices.month;
+            document.getElementById('price-input-year').value = db.verificationPrices.year;
+            document.getElementById('price-input-forever').value = db.verificationPrices.forever;
+
+            const verContainer = document.getElementById('nav-verified-container');
+            verContainer.innerHTML = '';
+            if (currentUser && currentUser.verified) {
+                verContainer.innerHTML = `<span class="verified-badge" title="حساب موثق">✓</span>`;
+            }
+
+            if (currentUser) {
+                document.getElementById('header-user-stars').innerText = formatNumberAbbr(currentUser.stars);
+                document.getElementById('header-auth-display').innerHTML = `مرحباً، <strong>${currentUser.name}</strong> ${currentUser.verified ? '<span class="verified-badge" style="width:16px; height:16px; font-size:0.5rem; vertical-align:middle;">✓</span>' : ''} (ID: ${currentUser.id})`;
+            } else {
+                document.getElementById('header-user-stars').innerText = "0";
+                document.getElementById('header-auth-display').innerHTML = `<a href="javascript:void(0)" onclick="openUserSettingsModal()" style="color:var(--accent-glow); font-weight:bold; text-decoration:none;">تسجيل الدخول</a>`;
+            }
+
+            renderCategories();
+            if (currentViewingCatId !== null) renderCategoryView(currentViewingCatId);
+            else renderMedia();
+            renderLeaderboard();
+            renderAdminData();
+            renderStarPackagesSelect();
+            renderChatStream();
+        }
+
+        /* وظيفة التبديل الذكي بين واجهة الشات وواجهة الأفلام الرئيسية */
+        function toggleChatAndHomeView() {
+            const mainArea = document.getElementById('main-content-area');
+            const chatArea = document.getElementById('chat-page-view');
+            const floatBtn = document.getElementById('toggle-view-float-btn');
+
+            isChatPageViewActive = !isChatPageViewActive;
+            if (isChatPageViewActive) {
+                mainArea.style.display = 'none';
+                chatArea.style.display = 'block';
+                floatBtn.innerHTML = '🎬';
+                floatBtn.setAttribute('data-tooltip', 'العودة لواجهة الأفلام الرئيسية');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast('تم فتح صفحة الشات والحصريات بنجاح!');
+            } else {
+                chatArea.style.display = 'none';
+                mainArea.style.display = 'block';
+                floatBtn.innerHTML = '💬';
+                floatBtn.setAttribute('data-tooltip', 'افتح صفحة الشات والمحتوى الحصري');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast('تم العودة للواجهة الرئيسية للأفلام!');
+            }
+        }
+
+        function goHome() {
+            if (isChatPageViewActive) toggleChatAndHomeView();
+            currentViewingCatId = null;
+            document.getElementById('dynamic-main-title').innerText = "أحدث الأفلام والمسلسلات الفخمة";
+            renderMedia();
+        }
+
+        function renderChatStream() {
+            const container = document.getElementById('chat-stream-container');
+            if(!container) return;
+            container.innerHTML = '';
+
+            if(!db.chatPosts || db.chatPosts.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); text-align:center;">لا توجد منشورات في صفحة الشات حالياً.</p>`;
+                return;
+            }
+
+            db.chatPosts.slice().reverse().forEach(post => {
+                const card = document.createElement('div');
+                card.className = 'chat-stream-card';
+                card.innerHTML = `
+                    <div class="chat-stream-header">
+                        <img class="chat-stream-avatar" src="${db.logoUrl}" alt="Admin">
+                        <div>
+                            <div style="font-weight:bold; font-size:1.05rem;">إدارة ${db.storeName} <span class="verified-badge" style="width:16px; height:16px; font-size:0.5rem; vertical-align:middle;">✓</span></div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">منشور حصري متزامن مع الـ Backend</div>
+                        </div>
+                    </div>
+                    ${post.title ? `<h3 style="margin-bottom:10px; color:var(--accent-glow);">${post.title}</h3>` : ''}
+                    <div class="chat-stream-body">${post.text}</div>
+                    ${post.mediaUrl ? (post.isVideo ? `<video class="chat-stream-media" src="${post.mediaUrl}" controls></video>` : `<img class="chat-stream-media" src="${post.mediaUrl}" alt="Post Media">`) : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function previewAdminChatFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                adminChatIsVideo = file.type.startsWith('video');
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    adminChatTempFile = e.target.result;
+                    const imgEl = document.getElementById('admin-chat-preview-img');
+                    const vidEl = document.getElementById('admin-chat-preview-video');
+                    if(adminChatIsVideo) {
+                        imgEl.style.display = 'none';
+                        vidEl.style.display = 'block';
+                        vidEl.src = adminChatTempFile;
+                    } else {
+                        vidEl.style.display = 'none';
+                        imgEl.style.display = 'block';
+                        imgEl.src = adminChatTempFile;
+                    }
+                    document.getElementById('admin-chat-preview-box').style.display = 'flex';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleAdminPublishChatPost(event) {
+            event.preventDefault();
+            const title = document.getElementById('admin-chat-title').value.trim();
+            const text = document.getElementById('admin-chat-text').value.trim();
+
+            if (!text && !adminChatTempFile) {
+                showToast('يرجى كتابة نص أو إرفاق صورة/فيديو للنشر!', true);
+                return;
+            }
+
+            db.chatPosts.push({
+                id: Date.now(),
+                title,
+                text,
+                mediaUrl: adminChatTempFile,
+                isVideo: adminChatIsVideo
+            });
+            saveLocalStorage();
+            renderChatStream();
+            renderAdminData();
+            document.getElementById('admin-chat-publish-form').reset();
+            adminChatTempFile = "";
+            adminChatIsVideo = false;
+            document.getElementById('admin-chat-preview-box').style.display = 'none';
+            showToast('تم النشر بنجاح في صفحة الشات ووصلت للمستخدمين!');
+        }
+
+        function deleteChatPost(id) {
+            db.chatPosts = db.chatPosts.filter(p => p.id !== id);
+            saveLocalStorage();
+            renderChatStream();
+            renderAdminData();
+            showToast('تم حذف المنشور بنجاح');
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categories-container');
+            const selectAdminCat = document.getElementById('admin-media-cat');
+            const adminManageCatSelect = document.getElementById('admin-manage-cat-select');
+
+            container.innerHTML = '';
+            selectAdminCat.innerHTML = '';
+            if(adminManageCatSelect) adminManageCatSelect.innerHTML = '';
+
+            db.categories.forEach(cat => {
+                const isUnlockedForUser = currentUser && (cat.unlockedForIds && cat.unlockedForIds.includes(currentUser.id));
+                const isGloballyLocked = cat.starsLock > 0 && !isUnlockedForUser;
+
+                const card = document.createElement('div');
+                card.className = `category-card ${isGloballyLocked ? 'locked' : ''}`;
+                card.setAttribute('data-lock-text', `🔒 مقفول بـ ${formatNumberAbbr(cat.starsLock)} ⭐ (اضغط لفتحه حصرياً لك)`);
+                card.innerHTML = `
+                    <h3 style="font-size: 1.2rem; margin-bottom: 5px;">${cat.name}</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">${isUnlockedForUser ? '✨ مفتوح حصرياً لـ ID الخاص بك' : (cat.starsLock > 0 ? 'مطلوب ' + formatNumberAbbr(cat.starsLock) + ' ⭐' : 'متاح للجميع')}</p>
+                `;
+                card.onclick = () => {
+                    if (isGloballyLocked) {
+                        if (!currentUser) { showToast('يجب تسجيل الدخول أولاً!', true); openUserSettingsModal(); return; }
+                        if (currentUser.banned) { showToast('حسابك محظور!', true); return; }
+                        if (currentUser.stars < cat.starsLock) { showToast(`رصيدك لا يكفي لفتح القسم!`, true); openStarsModal(); return; }
+                        if (confirm(`خصم ${formatNumberAbbr(cat.starsLock)} نجمة لفتح قسم "${cat.name}" حصرياً؟`)) {
+                            currentUser.stars -= cat.starsLock;
+                            if (!cat.unlockedForIds) cat.unlockedForIds = [];
+                            cat.unlockedForIds.includes(currentUser.id) || cat.unlockedForIds.push(currentUser.id);
+                            saveLocalStorage();
+                            renderAll();
+                            showToast(`تم فتح قسم "${cat.name}" حصرياً على حسابك بنجاح!`);
+                        }
+                    } else {
+                        openCategoryView(cat.id);
+                    }
+                };
+                container.appendChild(card);
+
+                const opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.innerText = cat.name;
+                selectAdminCat.appendChild(opt);
+
+                if(adminManageCatSelect) {
+                    const opt2 = document.createElement('option');
+                    opt2.value = cat.id;
+                    opt2.innerText = cat.name;
+                    adminManageCatSelect.appendChild(opt2);
+                }
+            });
+
+            renderAdminCategoriesTable();
+            updateAdminTargetWorkEpisodes();
+            if(adminManageCatSelect && adminManageCatSelect.options.length > 0) renderAdminCategoryWorksList();
+        }
+
+        function openCategoryView(catId) {
+            currentViewingCatId = catId;
+            const cat = db.categories.find(c => c.id === catId);
+            if(!cat) return;
+            document.getElementById('dynamic-main-title').innerText = `محتويات قسم: ${cat.name}`;
+            renderCategoryView(catId);
+        }
+
+        function renderCategoryView(catId) {
+            const container = document.getElementById('media-container');
+            container.innerHTML = '';
+            const filtered = db.media.filter(m => m.catId === catId);
+            if (filtered.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align:center; grid-column: 1/-1;">لا توجد أعمال مضافة في هذا القسم حالياً.</p>`;
+                return;
+            }
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+                card.innerHTML = `
+                    ${item.isVideo ? `<video class="media-thumb" src="${item.url}" controls></video>` : `<img class="media-thumb" src="${item.url}" alt="${item.title}">`}
+                    <div class="media-details">
+                        <div class="media-title">${item.title}</div>
+                        <div class="media-desc">${item.desc}</div>
+                        <button class="watch-btn" onclick="openWatchModal(${item.id})">مشاهدة الحلقات والأعمال</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderMedia() {
+            const container = document.getElementById('media-container');
+            container.innerHTML = '';
+            if (db.media.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align:center; grid-column: 1/-1;">لا توجد أعمال مضافة حالياً.</p>`;
+                return;
+            }
+            db.media.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+                card.innerHTML = `
+                    ${item.isVideo ? `<video class="media-thumb" src="${item.url}" controls></video>` : `<img class="media-thumb" src="${item.url}" alt="${item.title}">`}
+                    <div class="media-details">
+                        <div class="media-title">${item.title}</div>
+                        <div class="media-desc">${item.desc}</div>
+                        <button class="watch-btn" onclick="openWatchModal(${item.id})">مشاهدة الحلقات والأعمال</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            container.innerHTML = '';
+            const eligibleUsers = db.users.filter(u => (u.stars >= 1000 || u.verified) && !u.banned).sort((a,b) => b.stars - a.stars);
+            if (eligibleUsers.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">لا يوجد مستخدمين برصيد 1K+ نجمة أو توثيق حالياً.</p>`;
+                return;
+            }
+            eligibleUsers.forEach((u, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-weight: bold; color: var(--accent-glow);">#${index + 1}</span>
+                        <span>${u.name} ${u.verified ? '<span class="verified-badge" style="width:16px; height:16px; font-size:0.5rem; vertical-align:middle;" title="موثق">✓</span>' : ''} (ID: ${u.id})</span>
+                    </div>
+                    <div style="color: #ffd700; font-weight: bold;">⭐ ${formatNumberAbbr(u.stars)}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function openAdminSecurityModal() { openModal('admin-security-modal'); }
+
+        function verifyAdminStep1() {
+            const val = parseInt(document.getElementById('sec-random-num').value);
+            if (val === 575 || val === 57) {
+                closeModal('admin-security-modal');
+                openModal('admin-pass-modal');
+                showToast('تم التحقق الأمني بنجاح');
+            } else if (val >= 1 && val <= 99999) {
+                showToast('رقم غير صحيح! تم طردك', true);
+                location.href = "about:blank";
+            } else {
+                showToast('اختر رقماً بين 1 و 99999', true);
+            }
+        }
+
+        function verifyAdminPassword() {
+            const pass = document.getElementById('sec-admin-pass').value;
+            if (pass === "G010079340866G") {
+                document.getElementById('sec-admin-pass').value = '';
+                closeModal('admin-pass-modal');
+                openModal('admin-dashboard-modal');
+                renderAdminData();
+                showToast('تم الدخول لوحة المشرف بنجاح');
+            } else {
+                showToast('كلمة السر خاطئة!', true);
+            }
+        }
+
+        function switchAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function previewAdminMediaImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                adminIsVideoFile = file.type.startsWith('video');
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    adminTempFile = e.target.result;
+                    const imgEl = document.getElementById('admin-media-preview-img');
+                    const vidEl = document.getElementById('admin-media-preview-video');
+                    if(adminIsVideoFile) {
+                        imgEl.style.display = 'none'; vidEl.style.display = 'block'; vidEl.src = adminTempFile;
+                    } else {
+                        vidEl.style.display = 'none'; imgEl.style.display = 'block'; imgEl.src = adminTempFile;
+                    }
+                    document.getElementById('admin-media-preview-box').style.display = 'flex';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewAdminCoverImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    adminCoverTempFile = e.target.result;
+                    document.getElementById('admin-cover-preview-img').src = adminCoverTempFile;
+                    document.getElementById('admin-cover-preview-box').style.display = 'flex';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateAdminTargetWorkEpisodes() {
+            const catId = parseInt(document.getElementById('admin-media-cat').value);
+            const targetWorkSel = document.getElementById('admin-target-media-select');
+            targetWorkSel.innerHTML = '';
+            const filteredMedia = db.media.filter(m => m.catId === catId);
+            
+            const newOpt = document.createElement('option');
+            newOpt.value = "new";
+            newOpt.innerText = "--- ➕ إضافة عمل جديد تماماً ---";
+            targetWorkSel.appendChild(newOpt);
+
+            filteredMedia.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.innerText = m.title;
+                targetWorkSel.appendChild(opt);
+            });
+            toggleNewWorkInputs();
+        }
+
+        function toggleNewWorkInputs() {
+            const val = document.getElementById('admin-target-media-select').value;
+            const newFields = document.getElementById('new-work-fields-container');
+            newFields.style.display = (val === "new") ? "block" : "none";
+            populateEpisodeNumbersSelect();
+        }
+
+        function populateEpisodeNumbersSelect() {
+            const workId = document.getElementById('admin-target-media-select').value;
+            const epNumSel = document.getElementById('admin-target-episode-num');
+            epNumSel.innerHTML = '';
+            if (workId === "new" || !workId) {
+                for (let i = 1; i <= 10; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.innerText = `الحلقة ${i} (جديدة)`;
+                    epNumSel.appendChild(opt);
+                }
+                return;
+            }
+            const work = db.media.find(m => m.id == workId);
+            if (work && work.episodes) {
+                work.episodes.forEach(ep => {
+                    const opt = document.createElement('option');
+                    opt.value = ep.num;
+                    opt.innerText = `الحلقة ${ep.num} (${ep.name})`;
+                    epNumSel.appendChild(opt);
+                });
+                const nextOpt = document.createElement('option');
+                nextOpt.value = work.episodes.length + 1;
+                nextOpt.innerText = `+ إضافة حلقة جديدة (${work.episodes.length + 1})`;
+                epNumSel.appendChild(nextOpt);
+            }
+        }
+
+        function handleAddMedia(event) {
+            event.preventDefault();
+            const catId = parseInt(document.getElementById('admin-media-cat').value);
+            const workIdVal = document.getElementById('admin-target-media-select').value;
+            const epNum = parseInt(document.getElementById('admin-target-episode-num').value) || 1;
+            const urlInput = document.getElementById('admin-media-url-input').value.trim();
+            let finalUrl = adminTempFile || urlInput;
+
+            if (!finalUrl) { showToast('يرجى إرفاق فيديو أو صورة الحلقة أو رابط صحيح!', true); return; }
+
+            if (workIdVal === "new") {
+                const titleInput = document.getElementById('admin-media-title').value.trim();
+                const desc = document.getElementById('admin-media-desc').value;
+                if (!titleInput) { showToast('يرجى أدخال عنوان العمل الفخم الجديد!', true); return; }
+                const coverUrl = adminCoverTempFile || finalUrl;
+
+                const newWork = {
+                    id: Date.now(),
+                    title: titleInput,
+                    desc: desc || "وصف العمل الجديد",
+                    catId: catId,
+                    url: coverUrl,
+                    isVideo: false,
+                    episodes: [
+                        { num: epNum, name: `الحلقة ${epNum}`, locked: false, cost: 50, videoUrl: finalUrl }
+                    ]
+                };
+                db.media.push(newWork);
+                saveLocalStorage();
+                renderAll();
+                renderAdminData();
+                showToast('تم إنشـاء العمل ونشر الحلقة بنجاح!');
+            } else {
+                let targetWork = db.media.find(m => m.id == workIdVal);
+                if (!targetWork) return;
+                targetWork.catId = catId;
+                let targetEp = targetWork.episodes.find(e => e.num === epNum);
+                if (targetEp) targetEp.videoUrl = finalUrl;
+                else targetWork.episodes.push({ num: epNum, name: `الحلقة ${epNum}`, locked: false, cost: 50, videoUrl: finalUrl });
+                saveLocalStorage();
+                renderAll();
+                renderAdminData();
+                showToast(`تم نشر الفيديو في الحلقة ${epNum} بنجاح!`);
+            }
+            document.getElementById('add-media-form').reset();
+            adminTempFile = "";
+            adminIsVideoFile = false;
+            adminCoverTempFile = "";
+            document.getElementById('admin-media-preview-box').style.display = 'none';
+            document.getElementById('admin-cover-preview-box').style.display = 'none';
+            updateAdminTargetWorkEpisodes();
+        }
+
+        function renderAdminData() {
+            const mediaBody = document.getElementById('admin-media-table-body');
+            mediaBody.innerHTML = '';
+            db.media.forEach(m => {
+                mediaBody.innerHTML += `
+                    <tr>
+                        <td>${m.title}</td>
+                        <td>قسم #${m.catId}</td>
+                        <td><button class="btn-sm btn-delete" onclick="deleteMedia(${m.id})">حذف</button></td>
+                    </tr>
+                `;
+            });
+
+            const chatPostsBody = document.getElementById('admin-chat-posts-table-body');
+            chatPostsBody.innerHTML = '';
+            if(!db.chatPosts || db.chatPosts.length === 0) {
+                chatPostsBody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-muted);">لا توجد منشورات شات حالياً</td></tr>`;
+            } else {
+                db.chatPosts.forEach(post => {
+                    chatPostsBody.innerHTML += `
+                        <tr>
+                            <td>${post.title || post.text.substring(0, 30) + '...'}</td>
+                            <td><button class="btn-sm btn-delete" onclick="deleteChatPost(${post.id})">حذف</button></td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const epSelect = document.getElementById('admin-select-media-episodes');
+            const currentSelectedEpId = epSelect.value;
+            epSelect.innerHTML = '';
+            db.media.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.innerText = m.title;
+                if (currentSelectedEpId && m.id == currentSelectedEpId) opt.selected = true;
+                epSelect.appendChild(opt);
+            });
+            loadEpisodesIntoAdmin();
+
+            const verifySel = document.getElementById('admin-verify-user-select');
+            verifySel.innerHTML = '';
+            db.users.forEach(u => {
+                verifySel.innerHTML += `<option value="${u.id}">${u.name} ${u.verified ? '🏅' : ''} (ID: ${u.id})</option>`;
+            });
+
+            const userManSel = document.getElementById('admin-select-user-manage');
+            userManSel.innerHTML = '';
+            db.users.forEach(u => {
+                userManSel.innerHTML += `<option value="${u.id}">${u.name} (ID: ${u.id}) - ⭐${formatNumberAbbr(u.stars)} ${u.banned ? '[محظور]' : ''}</option>`;
+            });
+            loadUserManageData();
+
+            const rechargeBody = document.getElementById('admin-recharge-requests-body');
+            rechargeBody.innerHTML = db.rechargeRequests.length === 0 ? `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">لا توجد طلبات شحن</td></tr>` : '';
+            db.rechargeRequests.forEach((req, idx) => {
+                rechargeBody.innerHTML += `
+                    <tr>
+                        <td>${req.userId}</td>
+                        <td>${req.senderPhone}</td>
+                        <td>⭐ ${formatNumberAbbr(req.stars)}</td>
+                        <td><button class="btn-sm btn-approve" onclick="approveRecharge(${idx})">قبول وإضافة النجوم</button></td>
+                    </tr>
+                `;
+            });
+
+            const verReqBody = document.getElementById('admin-verification-requests-body');
+            verReqBody.innerHTML = db.verificationRequests.length === 0 ? `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">لا توجد طلبات توثيق</td></tr>` : '';
+            db.verificationRequests.forEach((vreq, idx) => {
+                verReqBody.innerHTML += `
+                    <tr>
+                        <td>${vreq.userName} (${vreq.userId})</td>
+                        <td>${vreq.durationText}</td>
+                        <td>${vreq.price} جنيه</td>
+                        <td>${vreq.senderPhone}</td>
+                        <td>
+                            <div class="action-actions-btns">
+                                <button class="btn-sm btn-approve" onclick="approveVerificationRequest(${idx})">قبول</button>
+                                <button class="btn-sm btn-delete" onclick="rejectVerificationRequest(${idx})">رفض</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const contentBody = document.getElementById('admin-content-requests-body');
+            contentBody.innerHTML = db.contentRequests.length === 0 ? `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">لا توجد طلبات محتوى</td></tr>` : '';
+            db.contentRequests.forEach((creq, idx) => {
+                contentBody.innerHTML += `
+                    <tr>
+                        <td>${creq.userName} (${creq.userId})</td>
+                        <td>${creq.title}</td>
+                        <td><strong style="color: #ffd700;">${creq.rewardChoice === 'stars' ? 'نجوم ⭐' : 'فلوس 💵'}</strong></td>
+                        <td>${creq.isVideo ? `<video src="${creq.url}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;" controls></video>` : `<a href="${creq.url}" target="_blank"><img src="${creq.url}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></a>`}</td>
+                        <td><button class="btn-sm btn-approve" onclick="publishContentRequest(${idx})">نشر وقبول</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function deleteMedia(id) {
+            db.media = db.media.filter(m => m.id !== id);
+            saveLocalStorage();
+            renderAll();
+            renderAdminData();
+            showToast('تم حذف العمل بنجاح');
+        }
+
+        function renderAdminCategoryWorksList() {
+            const catId = parseInt(document.getElementById('admin-manage-cat-select').value);
+            const container = document.getElementById('admin-category-works-container');
+            if(!container) return;
+            const works = db.media.filter(m => m.catId === catId);
+            if(works.length === 0) { container.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">لا توجد أعمال داخل هذا القسم حالياً.</p>`; return; }
+            let html = `<div style="display:flex; flex-direction:column; gap:8px;">`;
+            works.forEach(w => {
+                html += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:8px; border:1px solid var(--border-color);">
+                        <span>${w.title} (${w.episodes ? w.episodes.length : 0} حلقة)</span>
+                        <button class="btn-sm btn-delete" onclick="deleteMedia(${w.id}); renderAdminCategoryWorksList();">حذف العمل</button>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function loadEpisodesIntoAdmin() {
+            const mediaId = parseInt(document.getElementById('admin-select-media-episodes').value);
+            const container = document.getElementById('admin-episodes-editor-container');
+            const media = db.media.find(m => m.id === mediaId);
+            if (!media) { container.innerHTML = ''; return; }
+            let html = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">`;
+            media.episodes.forEach((ep, idx) => {
+                html += `
+                    <div style="display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.03); padding:10px; border-radius:8px;">
+                        <span style="font-weight:bold;">حلقة ${ep.num}:</span>
+                        <input type="text" id="ep-name-${media.id}-${idx}" class="form-control" value="${ep.name}" placeholder="اسم فخم" style="flex-grow:1;">
+                        <input type="number" id="ep-cost-${media.id}-${idx}" class="form-control" value="${ep.cost || 50}" placeholder="تكلفة" style="width:90px;">
+                        <label style="display:flex; align-items:center; gap:5px; cursor:pointer; white-space:nowrap;">
+                            <input type="checkbox" id="ep-lock-${media.id}-${idx}" ${ep.locked ? 'checked' : ''}> مقفولة
+                        </label>
+                        <button class="btn-sm btn-edit" type="button" onclick="saveEpisodeEdits(${media.id}, ${idx})">حفظ</button>
+                        <button class="btn-sm btn-delete" type="button" onclick="deleteEpisode(${media.id}, ${idx})">حذف</button>
+                    </div>
+                `;
+            });
+            html += `<button class="btn-sm btn-approve" type="button" style="margin-top:10px; padding:10px;" onclick="addNewEpisodeToMedia(${media.id})">+ إضافة حلقة جديدة</button></div>`;
+            container.innerHTML = html;
+        }
+
+        function saveEpisodeEdits(mediaId, epIdx) {
+            const media = db.media.find(m => m.id === mediaId);
+            if (!media) return;
+            media.episodes[epIdx].name = document.getElementById(`ep-name-${mediaId}-${epIdx}`).value;
+            media.episodes[epIdx].locked = document.getElementById(`ep-lock-${mediaId}-${epIdx}`).checked;
+            media.episodes[epIdx].cost = parseInt(document.getElementById(`ep-cost-${mediaId}-${epIdx}`).value) || 50;
+            saveLocalStorage();
+            showToast('تم تحديث الحلقة بنجاح!');
+            renderAll();
+        }
+
+        function deleteEpisode(mediaId, epIdx) {
+            const media = db.media.find(m => m.id === mediaId);
+            if (!media) return;
+            if (confirm("هل أنت متأكد من حذف هذه الحلقة؟")) {
+                media.episodes.splice(epIdx, 1);
+                media.episodes.forEach((e, i) => { e.num = i + 1; });
+                saveLocalStorage();
+                loadEpisodesIntoAdmin();
+                updateAdminTargetWorkEpisodes();
+                renderAll();
+                showToast('تم حذف الحلقة بنجاح!');
+            }
+        }
+
+        function addNewEpisodeToMedia(mediaId) {
+            const media = db.media.find(m => m.id === mediaId);
+            if (!media) return;
+            const nextNum = media.episodes.length + 1;
+            media.episodes.push({ num: nextNum, name: `الحلقة ${nextNum}`, locked: false, cost: 50, videoUrl: "" });
+            saveLocalStorage();
+            loadEpisodesIntoAdmin();
+            updateAdminTargetWorkEpisodes();
+            renderAll();
+            showToast('تم إضافة الحلقة بنجاح');
+        }
+
+        function addNewCategory() {
+            const name = document.getElementById('new-cat-name').value;
+            const starsLock = parseInt(document.getElementById('new-cat-stars-lock').value) || 0;
+            if (!name) return;
+            db.categories.push({ id: Date.now(), name, starsLock, unlockedForIds: [] });
+            saveLocalStorage();
+            renderCategories();
+            showToast('تم إضافة القسم بنجاح!');
+            document.getElementById('new-cat-name').value = '';
+            document.getElementById('new-cat-stars-lock').value = '0';
+        }
+
+        function renderAdminCategoriesTable() {
+            const tbody = document.getElementById('admin-categories-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            db.categories.forEach((cat, idx) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${cat.name}</td>
+                        <td>${cat.starsLock > 0 ? 'مقفول بـ ' + formatNumberAbbr(cat.starsLock) + ' ⭐' : 'مفتوح للجميع'}</td>
+                        <td>
+                            <div class="action-actions-btns">
+                                <button class="btn-sm btn-edit" onclick="toggleCategoryLock(${cat.id})">${cat.starsLock > 0 ? 'فتح القسم' : 'قفل بالنجوم'}</button>
+                                <button class="btn-sm btn-delete" onclick="deleteCategory(${idx})">حذف</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function toggleCategoryLock(catId) {
+            const cat = db.categories.find(c => c.id === catId);
+            if (!cat) return;
+            if (cat.starsLock > 0) cat.starsLock = 0;
+            else {
+                let stars = prompt("أدخل عدد النجوم المطلوبة لقفل هذا القسم:", "500");
+                if (stars) cat.starsLock = parseInt(stars) || 500;
+            }
+            saveLocalStorage();
+            renderCategories();
+        }
+
+        function deleteCategory(index) {
+            db.categories.splice(index, 1);
+            saveLocalStorage();
+            renderCategories();
+            showToast('تم حذف القسم بنجاح');
+        }
+
+        function updateLogoImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    db.logoUrl = e.target.result;
+                    saveLocalStorage();
+                    renderAll();
+                    showToast('تم تحديث اللوجو بنجاح!');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateThemeColors() {
+            db.colors.bgPrimary = document.getElementById('color-bg-primary').value;
+            document.documentElement.style.setProperty('--bg-primary', db.colors.bgPrimary);
+        }
+
+        function saveStoreGeneralSettings() {
+            db.storeName = document.getElementById('setting-store-title').value;
+            db.storeNameColor = document.getElementById('setting-store-title-color').value;
+            saveLocalStorage();
+            renderAll();
+            showToast('تم حفظ إعدادات المتجر بنجاح!');
+        }
+
+        function setUserVerified(status) {
+            const userId = document.getElementById('admin-verify-user-select').value;
+            const user = db.users.find(u => u.id === userId);
+            if (user) {
+                user.verified = status;
+                user.verificationExpires = status ? 'forever' : null;
+                saveLocalStorage();
+                renderAll();
+                renderAdminData();
+                showToast(`تم ${status ? 'منح التوثيق 🏅' : 'إزالة التوثيق'} بنجاح!`);
+            }
+        }
+
+        function loadUserManageData() {
+            const userId = document.getElementById('admin-select-user-manage').value;
+            const user = db.users.find(u => u.id === userId);
+            if (!user) return;
+            document.getElementById('admin-user-stars-mod').value = user.stars;
+            document.getElementById('admin-user-ban-check').checked = user.banned || false;
+        }
+
+        function saveUserManageModifications() {
+            const userId = document.getElementById('admin-select-user-manage').value;
+            const user = db.users.find(u => u.id === userId);
+            if (!user) return;
+            const newStars = parseInt(document.getElementById('admin-user-stars-mod').value);
+            const isBanned = document.getElementById('admin-user-ban-check').checked;
+            if (!isNaN(newStars)) user.stars = newStars;
+            user.banned = isBanned;
+            saveLocalStorage();
+            renderAll();
+            renderAdminData();
+            showToast(`تم تحديث بيانات المستخدم بنجاح!`);
+        }
+
+        function applyDiscountToStars() {
+            db.discountPercent = parseInt(document.getElementById('discount-percent-select').value);
+            generateStarPackages();
+            saveLocalStorage();
+            renderStarPackagesSelect();
+            showToast(`تم تطبيق الخصم بنجاح!`);
+        }
+
+        function updateBaseStarPrice() {
+            const val = parseFloat(document.getElementById('base-price-100').value);
+            if (!isNaN(val)) {
+                db.basePrice100 = val;
+                generateStarPackages();
+                saveLocalStorage();
+                showToast('تم تحديث السعر الأساسي بنجاح!');
+            }
+        }
+
+        function saveVerificationPricesSettings() {
+            db.verificationPrices.week = parseInt(document.getElementById('price-input-week').value) || 20;
+            db.verificationPrices.month = parseInt(document.getElementById('price-input-month').value) || 50;
+            db.verificationPrices.year = parseInt(document.getElementById('price-input-year').value) || 100;
+            db.verificationPrices.forever = parseInt(document.getElementById('price-input-forever').value) || 200;
+            saveLocalStorage();
+            showToast('تم تحديث أسعار التوثيق بنجاح!');
+        }
+
+        function openUserSettingsModal() {
+            openModal('user-settings-modal');
+            if (currentUser) {
+                document.getElementById('user-settings-logged-out').style.display = 'none';
+                document.getElementById('user-settings-logged-in').style.display = 'block';
+                document.getElementById('my-profile-id').innerText = currentUser.id;
+                document.getElementById('my-profile-stars').innerText = formatNumberAbbr(currentUser.stars);
+                document.getElementById('my-profile-name-display').innerHTML = `${currentUser.name} ${currentUser.verified ? '<span class="verified-badge" style="width:18px; height:18px; font-size:0.5rem; vertical-align:middle;">✓</span>' : ''}`;
+            } else {
+                document.getElementById('user-settings-logged-out').style.display = 'block';
+                document.getElementById('user-settings-logged-in').style.display = 'none';
+            }
+        }
+
+        function openVerificationPanelModal() {
+            openModal('verification-panel-modal');
+            populateVerificationSelect();
+            updateVerificationPriceDisplay();
+        }
+
+        function populateVerificationSelect() {
+            const sel = document.getElementById('verification-duration-select');
+            if(!sel) return;
+            sel.innerHTML = `
+                <option value="week" data-price="${db.verificationPrices.week}">أسبوع واحد - ${db.verificationPrices.week} جنيه</option>
+                <option value="month" data-price="${db.verificationPrices.month}">شهر كامل - ${db.verificationPrices.month} جنيه</option>
+                <option value="year" data-price="${db.verificationPrices.year}">سنة كاملة - ${db.verificationPrices.year} جنيه</option>
+                <option value="forever" data-price="${db.verificationPrices.forever}">للأبد (مدى الحياة) - ${db.verificationPrices.forever} جنيه</option>
+            `;
+        }
+
+        function updateVerificationPriceDisplay() {
+            const sel = document.getElementById('verification-duration-select');
+            if(!sel || sel.options.length === 0) return;
+            const opt = sel.options[sel.selectedIndex];
+            if(opt) document.getElementById('verification-price-display').innerText = `${opt.getAttribute('data-price')} جنيه`;
+        }
+
+        function submitVerificationPurchaseRequest() {
+            if (!currentUser) return;
+            const sel = document.getElementById('verification-duration-select');
+            const opt = sel.options[sel.selectedIndex];
+            const senderPhone = document.getElementById('verification-sender-phone').value.trim();
+            if (!senderPhone) { showToast('أدخل رقم الهاتف', true); return; }
+
+            db.verificationRequests.push({
+                userId: currentUser.id,
+                userName: currentUser.name,
+                durationType: sel.value,
+                durationText: opt.innerText.split(' - ')[0],
+                price: parseInt(opt.getAttribute('data-price')),
+                senderPhone
+            });
+            saveLocalStorage();
+            closeModal('verification-panel-modal');
+            showToast('تم إرسال طلب التوثيق للمشرف بنجاح!');
+        }
+
+        function approveVerificationRequest(index) {
+            const req = db.verificationRequests[index];
+            const user = db.users.find(u => u.id === req.userId);
+            if (user) {
+                user.verified = true;
+                const now = Date.now();
+                if (req.durationType === 'week') user.verificationExpires = now + (7 * 86400000);
+                else if (req.durationType === 'month') user.verificationExpires = now + (30 * 86400000);
+                else if (req.durationType === 'year') user.verificationExpires = now + (365 * 86400000);
+                else user.verificationExpires = 'forever';
+            }
+            db.verificationRequests.splice(index, 1);
+            saveLocalStorage();
+            renderAll();
+            renderAdminData();
+            showToast('تم قبول طلب التوثيق بنجاح!');
+        }
+
+        function rejectVerificationRequest(index) {
+            db.verificationRequests.splice(index, 1);
+            saveLocalStorage();
+            renderAdminData();
+            showToast('تم رفض الطلب');
+        }
+
+        function changeUserPassword() {
+            if (!currentUser) return;
+            const oldPass = document.getElementById('old-password-input').value.trim();
+            const newPass = document.getElementById('new-password-input').value.trim();
+            if (currentUser.pass !== oldPass) { showToast('كلمة السر القديمة خاطئة!', true); return; }
+            currentUser.pass = newPass;
+            saveLocalStorage();
+            showToast('تم تغيير كلمة السر بنجاح!');
+        }
+
+        function registerOrLoginUser() {
+            const name = document.getElementById('auth-username').value.trim();
+            const pass = document.getElementById('auth-password').value.trim();
+            if (!name || !pass) { showToast('أدخل الاسم وكلمة السر', true); return; }
+            let existing = db.users.find(u => u.name === name);
+            if (existing) {
+                if (existing.banned) { showToast('محظور!', true); return; }
+                if (existing.pass === pass) { currentUser = existing; showToast(`مرحباً بك ${currentUser.name}!`); }
+                else { showToast('كلمة السر خاطئة', true); return; }
+            } else {
+                let newId = Math.floor(10000 + Math.random() * 90000).toString();
+                currentUser = { id: newId, name, pass, stars: 100, verified: false, banned: false, unlockedCategories: [], unlockedEpisodes: [], personalUploads: [] };
+                db.users.push(currentUser);
+                saveLocalStorage();
+                showToast(`تم إنشاء حسابك! ID: ${newId}`);
+            }
+            renderAll();
+            openUserSettingsModal();
+        }
+
+        function previewUserImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                userIsVideoFile = file.type.startsWith('video');
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userTempUploadFile = e.target.result;
+                    const imgEl = document.getElementById('user-upload-preview-img');
+                    const vidEl = document.getElementById('user-upload-preview-video');
+                    if(userIsVideoFile) { imgEl.style.display = 'none'; vidEl.style.display = 'block'; vidEl.src = userTempUploadFile; }
+                    else { vidEl.style.display = 'none'; imgEl.style.display = 'block'; imgEl.src = userTempUploadFile; }
+                    document.getElementById('user-upload-preview-box').style.display = 'flex';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function submitUserContentUpload() {
+            if (currentUser.banned) return;
+            const title = document.getElementById('user-upload-title').value;
+            const rewardChoice = document.getElementById('user-reward-choice').value;
+            let finalUrl = userTempUploadFile || document.getElementById('user-upload-url-input').value.trim();
+            if (!title || !finalUrl) { showToast('أدخل العنوان والملف', true); return; }
+            db.contentRequests.push({ userId: currentUser.id, userName: currentUser.name, title, url: finalUrl, isVideo: userIsVideoFile, rewardChoice });
+            saveLocalStorage();
+            showToast('تم إرسال المحتوى للمراجعة بنجاح!');
+        }
+
+        function publishContentRequest(index) {
+            const creq = db.contentRequests[index];
+            const user = db.users.find(u => u.id === creq.userId);
+            db.media.push({ id: Date.now(), title: creq.title, desc: `مرفوع بواسطة: ${creq.userName}`, catId: 1, url: creq.url, isVideo: creq.isVideo, episodes: [{ num: 1, name: creq.title, locked: false, cost: 0, videoUrl: creq.url }] });
+            if (user && creq.rewardChoice === 'stars') user.stars += 200;
+            db.contentRequests.splice(index, 1);
+            saveLocalStorage();
+            renderAll();
+            renderAdminData();
+            showToast('تم نشر العمل بنجاح!');
+        }
+
+        function openStarsModal() {
+            if (currentUser && currentUser.banned) return;
+            openModal('stars-modal');
+            renderStarPackagesSelect();
+            calculateRechargePrice();
+        }
+
+        function renderStarPackagesSelect() {
+            const select = document.getElementById('recharge-package-select');
+            if(!select) return;
+            select.innerHTML = '';
+            db.starPackages.forEach(pkg => {
+                select.innerHTML += `<option value="${pkg.stars}">${formatNumberAbbr(pkg.stars)} نجمة - (${pkg.price} جنيه)</option>`;
+            });
+        }
+
+        function calculateRechargePrice() {
+            const starsVal = parseInt(document.getElementById('recharge-package-select').value);
+            const pkg = db.starPackages.find(p => p.stars === starsVal);
+            if (pkg) document.getElementById('recharge-price-display').innerText = `${pkg.price} جنيه`;
+        }
+
+        function submitStarsRechargeRequest() {
+            const stars = parseInt(document.getElementById('recharge-package-select').value);
+            const senderPhone = document.getElementById('recharge-sender-phone').value.trim();
+            const userId = document.getElementById('recharge-user-id').value.trim();
+            if (!senderPhone || !userId) { showToast('أدخل البيانات المطلوبة', true); return; }
+            db.rechargeRequests.push({ userId, senderPhone, stars });
+            saveLocalStorage();
+            closeModal('stars-modal');
+            showToast('تم إرسال طلب الشحن بنجاح!');
+        }
+
+        function approveRecharge(index) {
+            const req = db.rechargeRequests[index];
+            const user = db.users.find(u => u.id === req.userId);
+            if (user) user.stars += req.stars;
+            db.rechargeRequests.splice(index, 1);
+            saveLocalStorage();
+            renderAll();
+            renderAdminData();
+            showToast('تمت الموافقة وإضافة النجوم بنجاح!');
+        }
+
+        function openWatchModal(mediaId) {
+            if (!currentUser) { showToast('سجل الدخول أولاً!', true); openUserSettingsModal(); return; }
+            if (currentUser.banned) return;
+            const item = db.media.find(m => m.id === mediaId);
+            if (!item) return;
+            document.getElementById('watch-modal-title').innerText = item.title;
+            document.getElementById('watch-modal-desc').innerText = item.desc;
+            const playerContainer = document.getElementById('watch-modal-player-container');
+            
+            function playEp(ep) {
+                let src = ep.videoUrl || item.url;
+                if (item.isVideo || ep.videoUrl) playerContainer.innerHTML = `<video src="${src}" style="width:100%; height:100%; object-fit:cover;" controls autoplay></video>`;
+                else playerContainer.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:cover;" alt="Player">`;
+            }
+
+            const epWrapper = document.getElementById('episodes-section-wrapper');
+            const epGrid = document.getElementById('watch-modal-episodes-grid');
+            
+            function renderEpList() {
+                epGrid.innerHTML = '';
+                if (item.episodes && item.episodes.length > 0) {
+                    epWrapper.style.display = 'block';
+                    item.episodes.forEach(ep => {
+                        let cost = ep.cost || 50;
+                        if (!currentUser.unlockedEpisodes) currentUser.unlockedEpisodes = [];
+                        let unlocked = !ep.locked || currentUser.unlockedEpisodes.includes(`${item.id}_${ep.num}`);
+                        let card = document.createElement('div');
+                        card.className = `episode-card-lux`;
+                        card.innerHTML = `
+                            <div style="font-weight:bold;">${ep.name}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">حلقة ${ep.num}</div>
+                            <div style="margin-top:8px; font-size:0.85rem; color:${!unlocked ? '#ffd700' : '#10b981'};">${!unlocked ? `🔒 (${cost} ⭐)` : '▶ مشاهدة'}</div>
+                        `;
+                        card.onclick = () => {
+                            if (!unlocked) {
+                                if (currentUser.stars < cost) { showToast('رصيدك لا يكفي!', true); openStarsModal(); return; }
+                                if (confirm(`خصم ${cost} نجمة لفتح الحلقات؟`)) {
+                                    currentUser.stars -= cost;
+                                    currentUser.unlockedEpisodes.push(`${item.id}_${ep.num}`);
+                                    saveLocalStorage();
+                                    renderAll();
+                                    renderEpList();
+                                    playEp(ep);
+                                    showToast('تم فتح الحلقة بنجاح!');
+                                }
+                            } else { playEp(ep); }
+                        };
+                        epGrid.appendChild(card);
+                    });
+                } else { epWrapper.style.display = 'none'; }
+            }
+
+            if (item.episodes && item.episodes.length > 0) playEp(item.episodes[0]);
+            renderEpList();
+            openModal('watch-media-modal');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    </script>
+</body>
+</html>
